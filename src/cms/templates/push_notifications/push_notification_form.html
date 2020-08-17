@@ -8,7 +8,16 @@
 {% load rules %}
 {% load compress %}
 
-
+<script>
+    function switch_language(language) {
+        var languages = ['{{ languages|join:"', '"}}'];
+        console.log(languages);
+        languages.forEach(function(language){
+            document.getElementById("tab-"+language).style.display = "none";
+        });
+        document.getElementById("tab-"+language).style.display = "block";
+}
+</script>
 <form method="post">
     {% csrf_token %}
     <div class="flex flex-wrap mb-4">
@@ -31,39 +40,39 @@
              <input type="submit" name="submit_save" class="{% if public %}bg-blue-500 hover:bg-blue-600{% else %}bg-gray-400 hover:bg-gray-500{% endif %} cursor-pointer text-white font-bold py-3 px-4 rounded mr-2" value="{% trans 'Save' %}" />
              <input type="submit" name="submit_send" class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded" value="{% trans 'Save & Send' %}" />
        </div>
-       <div class="w-4/5 flex flex-wrap flex-col pr-2">
+       <div class="w-4/5 flex flex-wrap flex-col pr-2 tabbed">
             {{page_form.errors}}
             {{page_translation_form.errors}}
             <ul class="flex flex-wrap pl-4">
                 {% for other_language in languages %}
-                    <li class="mr-1 {% if other_language == language %}z-10{% endif %}" style="margin-bottom: -2px">
-                        <div class="bg-white text-blue-500 {% if other_language != language %}hover:bg-blue-500 hover:text-white{% endif %} border-l-2 border-t-2 border-r-2 border-blue-500 font-bold rounded-t-lg">
+                <li class="mr-1 " style="margin-bottom: -2px" onclick="switch_language('{{ other_language }}')">
+                        <div class="bg-white text-blue-500 hover:bg-blue-500 hover:text-white border-l-2 border-t-2 border-r-2 border-blue-500 font-bold rounded-t-lg">
                             <div class="border-b-2 border-white">
-                            <div class="p-4">
-                                    <span title="{% trans 'Create Translation' %}">
-                                        <i data-feather="plus" class="inline-block"></i>
-                                    </span>
-                            </div>
+                                <div class="p-4">{{ other_language }}</div>
                             </div>
                         </div>
                     </li>
                 {% endfor %}
             </ul>
-            <div class="w-full mb-4 rounded border-2 border-blue-500 bg-white flex-auto">
+            <figure>
+            {% for other_language in languages %}
+            <div id="tab-{{ other_language }}" class="w-full mb-4 rounded border-2 border-blue-500 bg-white flex-auto" style="{% if other_language != language %}display: none;{% endif %}">
                     <div class="w-full p-4">
                         {{push_notification_translation_form.errors}}
                         <div class="w-full p-4 mb-4 rounded border border-solid border-gray-200 shadow bg-white">
                             <label for="id_title" class="block mb-2 font-bold cursor-pointer">{% trans 'Title' %}</label>
-                            {% blocktrans asvar title_placeholder %}Insert title in {{ language }} here{% endblocktrans %}
+                            {% blocktrans asvar title_placeholder %}Insert title in {{ other_language }} here{% endblocktrans %}
                             {% render_field push_notification_translation_form.title placeholder=title_placeholder class="appearance-none block w-full bg-gray-200 text-xl text-gray-800 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400" %}
                         </div>
                         <div class="w-full p-4 mb-4 rounded border border-solid border-gray-200 shadow bg-white">
                             <label for="id_text" class="block mb-2 font-bold cursor-pointer">{% trans 'Content' %}</label>
-                            {% blocktrans asvar text_placeholder %}Insert content in {{ language }} here{% endblocktrans %}
+                            {% blocktrans asvar text_placeholder %}Insert content in {{ other_language }} here{% endblocktrans %}
                             {% render_field push_notification_translation_form.text placeholder=text_placeholder class="appearance-none block w-full bg-gray-200 text-xl text-gray-800 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400" %}
                         </div>
                     </div>
                 </div>
+            {% endfor %}
+            </figure>
             </div>
         </div>
     </div>
