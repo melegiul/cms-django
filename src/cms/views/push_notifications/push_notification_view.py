@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
+from django.forms import formset_factory
 
 from .push_notification_sender import PushNotificationSender
 from ...decorators import region_permission_required
@@ -30,24 +31,22 @@ class PushNotificationView(PermissionRequiredMixin, TemplateView):
         language = Language.objects.get(code=kwargs.get('language_code'))
         if push_notification:
             push_notification_form = PushNotificationForm(instance=push_notification)
-            push_notification_translation = PushNotificationTranslation.objects.filter(
-                push_notification=push_notification,
-                language=language
+            push_notification_translations = PushNotificationTranslation.objects.filter(
+                push_notification=push_notification
             )
-            if push_notification_translation.exists():
-                push_notification_translation_form = PushNotificationTranslationForm(
-                    instance=push_notification_translation.first()
-                )
+            if push_notification_translations.exists():
+                push_notification_translation_formset = formset_factory(PushNotificationTranslationForm)
+                ptn_forms = push_notification_translation_formset(queryset=PushNotificationTranslation.objects.filter(push_notification=push_notification))
             else:
                 push_notification_translation_form = PushNotificationTranslationForm()
         else:
             push_notification_form = PushNotificationForm()
-            push_notification_translation_form = PushNotificationTranslationForm()
+            push_notification_translation_forms = formset_factory(PushNotificationTranslationForm)
         return render(request, self.template_name, {
             **self.base_context,
             'push_notification': push_notification,
             'push_notification_form': push_notification_form,
-            'push_notification_translation_form': push_notification_translation_form,
+            'push_notification_translation_forms': push_notification_translation_forms,
             'language': language,
             'languages': region.languages,
         })
