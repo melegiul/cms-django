@@ -40,11 +40,14 @@
              <input type="submit" name="submit_save" class="{% if public %}bg-blue-500 hover:bg-blue-600{% else %}bg-gray-400 hover:bg-gray-500{% endif %} cursor-pointer text-white font-bold py-3 px-4 rounded mr-2" value="{% trans 'Save' %}" />
              <input type="submit" name="submit_send" class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded" value="{% trans 'Save & Send' %}" />
        </div>
+       {% for key,value in test.items %}
+        {{key}}
+       {% endfor %}
        <div class="w-4/5 flex flex-wrap flex-col pr-2 tabbed">
             {{page_form.errors}}
             {{page_translation_form.errors}}
             <ul class="flex flex-wrap pl-4">
-                {% for other_language in languages %}
+                {% for other_language in formset_dict %}
                 <li class="mr-1 " style="margin-bottom: -2px" onclick="switch_language('{{ other_language }}')">
                         <div class="bg-white text-blue-500 hover:bg-blue-500 hover:text-white border-l-2 border-t-2 border-r-2 border-blue-500 font-bold rounded-t-lg">
                             <div class="border-b-2 border-white">
@@ -55,19 +58,20 @@
                 {% endfor %}
             </ul>
             <figure>
-            {% for other_language in languages %}
-            <div id="tab-{{ other_language }}" class="w-full mb-4 rounded border-2 border-blue-500 bg-white flex-auto" style="{% if other_language != language %}display: none;{% endif %}">
+            {% for other_language, form in formset_dict.items %}
+                <div id="tab-{{ other_language }}" class="w-full mb-4 rounded border-2 border-blue-500 bg-white flex-auto" style="{% if other_language != language %}display: none;{% endif %}">
                     <div class="w-full p-4">
                         {{push_notification_translation_form.errors}}
+                        {{ formset_dict.other_language }}
                         <div class="w-full p-4 mb-4 rounded border border-solid border-gray-200 shadow bg-white">
                             <label for="id_title" class="block mb-2 font-bold cursor-pointer">{% trans 'Title' %}</label>
                             {% blocktrans asvar title_placeholder %}Insert title in {{ other_language }} here{% endblocktrans %}
-                            {% render_field push_notification_translation_form.title placeholder=title_placeholder class="appearance-none block w-full bg-gray-200 text-xl text-gray-800 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400" %}
+                            {% render_field form.title placeholder=title_placeholder class="appearance-none block w-full bg-gray-200 text-xl text-gray-800 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400" %}
                         </div>
                         <div class="w-full p-4 mb-4 rounded border border-solid border-gray-200 shadow bg-white">
                             <label for="id_text" class="block mb-2 font-bold cursor-pointer">{% trans 'Content' %}</label>
                             {% blocktrans asvar text_placeholder %}Insert content in {{ other_language }} here{% endblocktrans %}
-                            {% render_field push_notification_translation_form.text placeholder=text_placeholder class="appearance-none block w-full bg-gray-200 text-xl text-gray-800 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400" %}
+                            {% render_field form.text placeholder=text_placeholder class="appearance-none block w-full bg-gray-200 text-xl text-gray-800 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400" %}
                         </div>
                     </div>
                 </div>
