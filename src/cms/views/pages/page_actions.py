@@ -215,7 +215,7 @@ def export_pdf(request, region_slug, page_id, language_code):
     inserts the content of all children pages
 
     :param request: request submitted for rendering pdf document
-    :type request: HttpRequest
+    :type request: ~django.http.HttpRequest
     :param page_id: database id for selected page
     :type page_id: integer
     :param language_code: bcp47 code of the current language
