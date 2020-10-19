@@ -18,8 +18,6 @@ sphinx = "*"
 sphinxcontrib-django = "*"
 sphinx-last-updated-by-git = "*"
 sphinx-rtd-theme = "*"
-reportlab = "*"
-xhtml2pdf = "*"
 
 [packages]
 integreat-cms = {editable = true, path = "."}
