@@ -8,10 +8,6 @@ import json
 import logging
 import os
 import uuid
-<<<<<<< HEAD
-=======
-import pyperclip
->>>>>>> added comments and bundled pdf styling in css file
 
 from mptt.exceptions import InvalidMove
 
@@ -122,63 +118,7 @@ def delete_page(request, page_id, region_slug, language_code):
     )
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-def expand_short_url(request, short_url_id):
-=======
-""" def export_pdf(request, page_id, region_slug, language_code):
-    region = Region.get_current_region(request)
-    page = get_object_or_404(region.pages, pk=page_id)
-    page_translation = page.get_translation(language_code)
-    # create file-like buffer to receive pdf data
-    buffer = io.BytesIO()
-    
-    print(page_translation.text)
-    doc = SimpleDocTemplate(
-        buffer, 
-        pagesize=A4, 
-        rightMargin=72, 
-        leftMargin=72, 
-        topMargin=72, 
-        bottomMargin=18
-    )
-    Story = []
-    styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(name='Justify', alignment=TA_JUSTIFY))
-    header = '<font size="8">%s</font>' % page_translation.title
-    styles.add(ParagraphStyle(
-        'IntegreatHeader',
-        fontName='Courier-Bold',
-        alignment=TA_JUSTIFY
-    ))
-    Story.append(Paragraph(header, styles["IntegreatHeader"]))
-    Story.append(Spacer(1, 12))
-    paragraph = '<font size="12">%s</font>' % page_translation.text
-    # paragraph = page_translation.text
-    styles.add(ParagraphStyle(
-        'integreat-text',
-        fontName='Courier',
-        alignment=TA_JUSTIFY
-    ))
-    Story.append(Paragraph(paragraph, styles["Normal"]))
-    doc.build(Story)
-
-    # FileResponse sets content-disposition header 
-    # so that browser offers to save to save the file
-    buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename='hello.pdf') """
-
-
-"""
-To allow URL references to be resolved using Django's STATIC_URL,
-specify a link_callback parameter to point to function that 
-converts relative to absolute URLs 
-"""
-
-
-=======
 # pylint: disable=unused-argument
->>>>>>> added comments and bundled pdf styling in css file
 def link_callback(uri, rel):
     """
     according to xhtml2pdf documentation this function is neccessary for
@@ -291,9 +231,7 @@ def export_pdf(request, region_slug, language_code):
         return response
 
 
-@login_required
-def copy_short_url(request, page_id, region_slug, language_code):
->>>>>>> installed xhtml2pdf: html content of page editor
+def expand_short_url(request, short_url_id):
     """
     Searches for a page with requested short_url_id and redirects to that page.
     """
