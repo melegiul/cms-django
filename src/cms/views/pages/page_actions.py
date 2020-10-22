@@ -232,7 +232,7 @@ def export_pdf(request, region_slug, language_code):
     pdf_key_list = [region_slug]
     for page in pages:
         # retrieve the translation for each page
-        page_translation = page.get_translation(language_code)
+        page_translation = page.get_public_translation(language_code)
         if page_translation:
             pdf_key_list.append(page_translation.id)
             pdf_key_list.append(page_translation.last_updated)
