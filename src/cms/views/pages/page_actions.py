@@ -21,6 +21,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
+from django.db.models import Min
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
 from django.utils.translation import ugettext as _
@@ -226,7 +227,7 @@ def export_pdf(request, region_slug, language_code):
     :rtype: ~django.http.HttpRequest
     """
     region = Region.get_current_region(request)
-    page_ids = request.GET.get('pages').split(',')
+    page_ids = request.GET.get("pages").split(",")
     # retrieve all selected pages
     pages = region.pages.filter(archived=False, id__in=page_ids)
     pdf_key_list = [region_slug]
@@ -238,10 +239,10 @@ def export_pdf(request, region_slug, language_code):
             pdf_key_list.append(page_translation.last_updated)
         else:
             pages = pages.exclude(id=page.id)
-    pdf_key_string = '_'.join(map(str, pdf_key_list))
-    pdf_hash_key = hashlib.sha256(bytes(pdf_key_string, 'utf-8')).hexdigest()
-    cached_response = cache.get(pdf_hash_key, 'has_expired')
-    if (cached_response is not 'has_expired'):
+    pdf_key_string = "_".join(map(str, pdf_key_list))
+    pdf_hash_key = hashlib.sha256(bytes(pdf_key_string, "utf-8")).hexdigest()
+    cached_response = cache.get(pdf_hash_key, "has_expired")
+    if cached_response is not "has_expired":
         return cached_response
     else:
         amount_pages = pages.count()
@@ -252,7 +253,7 @@ def export_pdf(request, region_slug, language_code):
             "region": region,
             "pages": pages,
             "language": language,
-            "amount_pages": amount_pages
+            "amount_pages": amount_pages,
         }
         response = HttpResponse(content_type="application/pdf")
         if amount_pages == 0:
@@ -275,7 +276,6 @@ def export_pdf(request, region_slug, language_code):
                 title = region.name
         filename = f"Integreat - {language.translated_name} - {title}.pdf"
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
-        )
         template = get_template(template_path)
         html = template.render(context)
         pisa_status = pisa.CreatePDF(html, dest=response, link_callback=link_callback)
@@ -287,7 +287,7 @@ def export_pdf(request, region_slug, language_code):
                 pages,
             )
             return HttpResponse(_("The PDF could not be successfully generated."))
-        cache.set(pdf_hash_key, response, 60*60*24)
+        cache.set(pdf_hash_key, response, 60 * 60 * 24)
         return response
 
 
