@@ -225,25 +225,26 @@ def export_pdf(request, region_slug, language_code):
     :return: pdf document offered for download
     :rtype: ~django.http.HttpRequest
     """
-    page_ids = []
     region = Region.get_current_region(request)
-    for page_id in request.GET.get('pages').split(','):
-        page_ids.append(page_id)
+    page_ids = request.GET.get('pages').split(',')
     # retrieve all selected pages
     pages = region.pages.filter(archived=False, id__in=page_ids)
-    amount_pages = len(pages)
     pdf_key_list = [region_slug]
     for page in pages:
         # retrieve the translation for each page
         page_translation = page.get_translation(language_code)
-        pdf_key_list.append(page_translation.id)
-        pdf_key_list.append(page_translation.last_updated)
+        if page_translation:
+            pdf_key_list.append(page_translation.id)
+            pdf_key_list.append(page_translation.last_updated)
+        else:
+            pages = pages.exclude(id=page.id)
     pdf_key_string = '_'.join(map(str, pdf_key_list))
     pdf_hash_key = hashlib.sha256(bytes(pdf_key_string, 'utf-8')).hexdigest()
     cached_response = cache.get(pdf_hash_key, 'has_expired')
     if (cached_response is not 'has_expired'):
         return cached_response
     else:
+        amount_pages = pages.count()
         language = Language.objects.get(code=language_code)
         template_path = "pages/page_view.html"
         context = {
@@ -254,18 +255,38 @@ def export_pdf(request, region_slug, language_code):
             "amount_pages": amount_pages
         }
         response = HttpResponse(content_type="application/pdf")
-        response["Content-Disposition"] = (
-            "attachment; filename=%s.pdf" % page_translation.title
+        if amount_pages == 0:
+            return HttpResponse(_("No valid pages selected for PDF generation."))
+        elif amount_pages == 1:
+            # If pdf contains only one page, take its title as filename
+            title = page_translation.title
+        else:
+            # If pdf contains multiple pages, check the minimum level
+            min_level = pages.aggregate(Min("level")).get("level__min")
+            # Query all pages with this minimum level
+            min_level_pages = pages.filter(level=min_level)
+            if min_level_pages.count() == 1:
+                # If there's exactly one page with the minimum level, take its title
+                title = (
+                    min_level_pages.first().get_public_translation(language_code).title
+                )
+            else:
+                # In any other case, take the region name
+                title = region.name
+        filename = f"Integreat - {language.translated_name} - {title}.pdf"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
         )
         template = get_template(template_path)
         html = template.render(context)
         pisa_status = pisa.CreatePDF(html, dest=response, link_callback=link_callback)
         if pisa_status.err:
-            return HttpResponse(
-                "There was an error while rendering the following html <pre>"
-                + html
-                + "</pre>"
+            logger.error(
+                "The following PDF could not be rendered: Region: %s, Language: %s, Pages: %s.",
+                region,
+                language,
+                pages,
             )
+            return HttpResponse(_("The PDF could not be successfully generated."))
         cache.set(pdf_hash_key, response, 60*60*24)
         return response
 
