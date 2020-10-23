@@ -77,3 +77,6 @@ p, ol, ul {
 li {
     padding: 1px 0px;
 }
+#wrapper {
+    font-family: DejaVu;
+}

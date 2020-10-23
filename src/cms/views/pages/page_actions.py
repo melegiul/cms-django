@@ -218,7 +218,9 @@ def export_pdf(request, region_slug, language_code):
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         template = get_template(template_path)
         html = template.render(context)
-        pisa_status = pisa.CreatePDF(html, dest=response, link_callback=link_callback)
+        pisa_status = pisa.CreatePDF(
+            html, dest=response, link_callback=link_callback, encoding="UTF-8"
+        )
         if pisa_status.err:
             logger.error(
                 "The following PDF could not be rendered: Region: %s, Language: %s, Pages: %s.",
